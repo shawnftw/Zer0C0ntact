@@ -1,0 +1,77 @@
+name: Taisun Developer
+description: |
+  Cloud9 from [LinuxServer.io](https://linuxserver.io/) [linuxserver/cloud9](https://hub.docker.com/r/linuxserver/cloud9/)
+  ============
+  
+  This will launch a blank development container that checks out the git URL passed to it below.
+  
+  At the core of these images is the <a href="https://github.com/c9/core" target="_blank">Cloud9</a> web based IDE, it is available in a few pre-configured flavors, all with a <a href="https://www.linuxserver.io/" target="_blank">LinuxServer.io</a> Ubuntu Bionic base: 
+    * Python - 3 installed by default with common development tools
+    * Node.js - 12.x series with npm and yarn
+    * Go - Latest stable release of GoLang
+    * Ruby - System level packages for Ruby and Bundle pre-installed
+    * Docker - For working on docker only logic, you should enable the Docker Socket to be able to build from inside the IDE
+  
+  If your application needs access to the Docker API make sure to enable the Docker Socket.
+  
+  **Note the internal port 8000 will be occupied by the Cloud9 interface you cannot pass that as an application port internally**
+
+form:
+  - type: input
+    label: name
+    FormName: Name
+    placeholder: Unique Name to identify *required
+    validation: ^[\w\d-\_]+$
+    errormessage: Name must only container letters, numbers, and - or _
+    required: true
+  - type: input
+    label: giturl
+    FormName: Git URL
+    placeholder: Public Git URL IE https://github.com/Taisun-Docker/taisun.git leave blank to start from scratch
+  - type: input
+    label: devport
+    FormName: Dev Interface Port
+    placeholder: Port to use to access the development interface
+    validation: ^([1-9]|[1-8][0-9]|9[0-9]|[1-8][0-9]{2}|9[0-8][0-9]|99[0-9]|[1-8][0-9]{3}|9[0-8][0-9]{2}|99[0-8][0-9]|999[0-9]|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$
+    errormessage: Values must be in a valid port range 1-65535
+    required: true
+  - type: textarea
+    label: ports
+    FormName: Application Ports
+    placeholder: To enter multiple use line breaks (enter) Format hostport:containerport
+    validation: ^([1-9]|[1-8][0-9]|9[0-9]|[1-8][0-9]{2}|9[0-8][0-9]|99[0-9]|[1-8][0-9]{3}|9[0-8][0-9]{2}|99[0-8][0-9]|999[0-9]|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])+(:([1-9]|[1-8][0-9]|9[0-9]|[1-8][0-9]{2}|9[0-8][0-9]|99[0-9]|[1-8][0-9]{3}|9[0-8][0-9]{2}|99[0-8][0-9]|999[0-9]|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))$
+    errormessage: Values must be in the format hostport:containerport 1-65535
+  - type: select
+    label: language
+    FormName: Language
+    options:
+      - docker
+      - python
+      - nodejs
+      - go
+      - ruby
+  - type: checkbox
+    label: dockersock
+    FormName: Enable Docker Socket
+
+compose: |
+  version: "3"
+  services:
+    {{ name }}:
+      image: linuxserver/cloud9:{% if language == 'docker' %}latest{% else %}{{ language }}{% endif %}
+      container_name: {{ name }}
+      network_mode: bridge
+      ports:
+        - "{{ devport }}:8000"
+        {% for port in ports %}- "{{ port }}"
+        {% endfor %}
+      environment:
+        - "GITURL={{ giturl }}"
+      labels:
+        - "stackname={{ stackname }}"
+        - "stacktype=developer"
+        - "stackurl={{ stackurl }}"
+        - "devport={{ devport }}"
+        - "devlanguage={{ language }}"
+      {% if dockersock == 'true' %}volumes:
+        - "/var/run/docker.sock:/var/run/docker.sock"{% endif %}

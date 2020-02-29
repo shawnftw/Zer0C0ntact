@@ -1,0 +1,93 @@
+name: Taisun Gateway
+description: |
+  Taisun Gateway Container [taisun/gateway](https://hub.docker.com/r/taisun/gateway/)
+  ============
+  
+  This will spinup a container on your system that houses 3 seperate running processes
+    * Taisun.io Https proxy with password protection (uses the DNSKey for auth)
+    * Dynamic DNS updater
+    * Certbot client for generating legitimate SSL certificates
+  
+  To use this service you will need to complete two seperate steps in advance:
+    1. Generate a Dynamic DNS url at [Taisun.io](https://www.taisun.io) (login then click on Taisun DynDNS) it will output keys needed for this form
+    2. Forward port 4443 from your router to the server hosting Taisun
+    
+  By default this container will use your DNS key for authentication. Keys are stored as securly as possible but they are stored in plain text.
+  If you do not want to trust server access from taisun.io to us please set a custom password below. Just note that even on a modern browser you may be prompted for this password many times when accessing your server.
+
+form:
+  - type: input
+    label: name
+    FormName: Name
+    placeholder: Unique Name to identify *required
+    value: gateway
+    validation: ^[\w\d-\_]+$
+    errormessage: Name must only container letters, numbers, and - or _
+    required: true
+  - type: input
+    format: text
+    label: domain
+    FormName: Taisun Domain
+    placeholder: format <yourdomain>.taisun.io
+    required: true
+  - type: input
+    format: text
+    label: dnskey
+    FormName: Taisun DNSKey
+    placeholder: IE debec485bcab4ab189a2315ae37fe196
+    required: true
+  - type: input
+    format: text
+    label: custompass
+    FormName: Custom Password
+    placeholder: Optional Make this complex it is internet facing
+    required: false
+  - type: input
+    format: text
+    label: email
+    FormName: Email
+    placeholder: This is used by certbot to send notifications of expiration
+    required: true
+  - type: input
+    format: text
+    label: taisunip
+    FormName: Taisun IP
+    placeholder: The local IP the taisun server is running on (hint look at your URL bar)
+    validation: ^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+    errormessage: Value must be a valid IP IE 192.168.1.100
+    required: true
+  - type: input
+    format: text
+    label: taisunport
+    FormName: Taisun Port
+    placeholder: Should be 3000 the port Taisun is listening on (hint look at your URL bar)
+    validation: ^([1-9]|[1-8][0-9]|9[0-9]|[1-8][0-9]{2}|9[0-8][0-9]|99[0-9]|[1-8][0-9]{3}|9[0-8][0-9]{2}|99[0-8][0-9]|999[0-9]|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$
+    errormessage: Values must be in a valid port range 1-65535
+    required: true
+
+compose: |
+  version: "3"
+  services:
+    taisungateway:
+      image: taisun/gateway:latest
+      container_name: taisun_gateway
+      environment:
+        - SERVERIP={{ domain }}
+        - DNSKEY={{ dnskey }}
+        - EMAIL={{ email }}
+        - TAISUNIP={{ taisunip }}
+        - TAISUNPORT={{ taisunport }}
+        {% if custompass|length %}- CUSTOMPASS={{ custompass }}{% endif %}
+      restart: always
+      network_mode: bridge
+      labels:
+        - "stackname={{ stackname }}"
+        - "stacktype=gateway"
+        - "stackurl={{ stackurl }}"
+      volumes:
+        - "ssl:/etc/letsencrypt"
+      ports:
+        - "4443:3000"
+  volumes:
+    ssl:
+    

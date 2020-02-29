@@ -1,0 +1,38 @@
+{
+  "name": "Zer0C0ntact",
+  "version": "0.1.2",
+  "description": "Zer0C0ntact docker server management",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shawnftw/Zer0C0ntact.git"
+  },
+  "author": "Shawn Rivera",
+  "license": "WTFPL",
+  "homepage": "https://zerocontact.co.vu",
+  "dependencies": {
+    "ansi_up": "^4.0.4",
+    "crypto": "^1.0.1",
+    "docker-hub-api": "^0.8.0",
+    "dockerode": "^3.0.2",
+    "dockops": "^0.2.1",
+    "ejs": "^2.7.1",
+    "express": "^4.17.1",
+    "git-clone": "^0.1.0",
+    "guacamole-lite": "^0.6.2",
+    "http": "0.0.0",
+    "js-yaml": "^3.13.1",
+    "nunjucks": "^3.2.0",
+    "request": "^2.88.0",
+    "rmdir": "^1.2.0",
+    "socket.io": "^2.3.0",
+    "systeminformation": "^4.14.17",
+    "tar-fs": "^2.0.0",
+    "util": "^0.12.1",
+    "uuid": "^3.3.3",
+    "xrandr-parse": "^1.0.0"
+  }
+}
